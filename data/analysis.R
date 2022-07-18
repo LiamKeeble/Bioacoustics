@@ -110,16 +110,14 @@ head(d, 100)
 
 #Model
 
-library(rstan)
-
-unit=rnorm(20,0,1)
-init=matrix(c(0.1,0.2,0.9,0.8), ncol=2, nrow=2)
+library(depmixS4)
 
 
+mod=depmix(x~1, family=gaussian(), nstates=3, data=d)
+fitm=fit(mod)
 
 
-
-
+summary(fitm)
 
 
 
