@@ -125,3 +125,58 @@ summary(fitm)
 
 
 
+
+#stan
+
+library(rstan)
+
+
+
+alpha=matrix(c(0.3,0.2,0.5,
+	       0.2,0.6,0.2,
+	       0.5,0.2,0.3),ncol=3,nrow=3)
+
+mod='
+data{
+vector[404] unit;
+simplex[3] alpha[3];
+}
+parameters{
+simplex[3] sigma[3];
+
+ordered[2] mu;
+real<lower=0,upper=1> theta;
+}
+model{
+for (n in 1:3){
+sigma[n]~dirichlet(alpha[n]);
+}
+mu~normal(0,1);
+theta~beta(5,5);
+for (t in 1:404)
+target += log_mix(theta,
+			  normal_lpdf(unit[t] | mu[1], sigma[1]),
+			  normal_lpdf(unit[t] | mu[2], sigma[2]));
+	
+}
+'
+
+data=list(
+unit=d$x,
+alpha=alpha
+)
+
+fit=stan(model_code=mod,data=data)
+print(fit)
+plot(fit)
+
+
+
+
+
+
+
+
+
+
+
