@@ -54,20 +54,27 @@ unit=rnorm(20,0,1),
 time=1:20
 )
 
-alpha=matrix(c(0.2,0.3,0.5,0.7), ncol=2, nrow=2)
+init=matrix(c(0.2,0.3,0.5,0.7), ncol=2, nrow=2)
 
 
 
 mod='
 data{
 vector[20] unit;
+matrix[2,2] init;
 }
 parameters{
 matrix<lower=0,upper=1>[2,2] alpha;
 real<lower=0,upper=1> theta;
+real<lower=0> sigma;
 }
 model{
 theta~beta(5,5);
+sigma~normal(0,1);
+alpha[1,1]~normal(init[1,1],sigma);
+alpha[1,2]~normal(init[1,2],sigma);
+alpha[2,1]~normal(init[2,1],sigma);
+alpha[2,2]~normal(init[2,2],sigma);
 for (n in 1:20)
 	target += log_mix(theta,
 	normal_lpdf(unit[n] | alpha[1,1], alpha[1,2]),
@@ -77,7 +84,8 @@ for (n in 1:20)
 '
 
 data=list(
-unit=d$unit
+unit=d$unit,
+init=init
 )
 
 fit=stan(model_code=mod, data=data)
